@@ -103,7 +103,7 @@ class DataController extends MapController
         // get host data
         $hostQuery = $this->backend
             ->select()
-            ->from('hoststatus', array(
+            ->from('hoststatus', [
                 'host_display_name',
                 'host_name',
                 'host_acknowledged',
@@ -113,7 +113,7 @@ class DataController extends MapController
                 'host_problem',
                 'coordinates' => '_host_geolocation',
                 'icon' => '_host_map_icon',
-            ))
+            ])
             ->applyFilter(Filter::fromQueryString('_host_geolocation >'));
 
         $this->applyRestriction('monitoring/filter/objects', $hostQuery);
@@ -122,7 +122,7 @@ class DataController extends MapController
         // get service data
         $serviceQuery = $this->backend
             ->select()
-            ->from('servicestatus', array(
+            ->from('servicestatus', [
                 'host_name',
                 'service_display_name',
                 'service_name' => 'service',
@@ -130,7 +130,7 @@ class DataController extends MapController
                 'service_state' => 'service_' . $this->stateColumn,
                 'service_last_state_change' => 'service_' . $this->stateChangeColumn,
                 'service_in_downtime'
-            ))
+            ])
             ->applyFilter(Filter::fromQueryString('_host_geolocation >'));
 
         if ($this->onlyProblems) {
@@ -145,7 +145,7 @@ class DataController extends MapController
                 $hostname = $row->host_name;
 
                 $host = (array)$row;
-                $host['services'] = array();
+                $host['services'] = [];
 
                 if (!preg_match($this->coordinatePattern, $host['coordinates'])) {
                     continue;
@@ -186,7 +186,7 @@ class DataController extends MapController
         // get services with geolocation
         $geoServiceQuery = $this->backend
             ->select()
-            ->from('servicestatus', array(
+            ->from('servicestatus', [
                 'host_display_name',
                 'host_name',
                 'host_acknowledged',
@@ -202,7 +202,7 @@ class DataController extends MapController
                 'coordinates' => '_service_geolocation',
                 'icon' => '_service_map_icon',
 
-            ))->applyFilter(Filter::fromQueryString('_service_geolocation >'));
+            ])->applyFilter(Filter::fromQueryString('_service_geolocation >'));
 
         if ($this->onlyProblems) {
             $geoServiceQuery->applyFilter(Filter::where('service_problem', 1));

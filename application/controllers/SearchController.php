@@ -92,12 +92,12 @@ class SearchController extends MapController
 
         $hostQuery = $this->backend
             ->select()
-            ->from('servicestatus', array(
+            ->from('servicestatus', [
                 'service_display_name',
                 'service',
                 'host_name',
                 'coordinates' => '_service_geolocation',
-            ))
+            ])
             ->applyFilter(Filter::fromQueryString('_service_geolocation >'))
             ->applyFilter(Filter::fromQueryString($filter))
             ->limit($this->limit);
@@ -135,11 +135,11 @@ class SearchController extends MapController
 
         $hostQuery = $this->backend
             ->select()
-            ->from('hoststatus', array(
+            ->from('hoststatus', [
                 'host_display_name',
                 'host_name',
                 'coordinates' => '_host_geolocation',
-            ))
+            ])
             ->applyFilter(Filter::fromQueryString('_host_geolocation >'))
             ->applyFilter(Filter::fromQueryString($filter))
             ->limit($this->limit);

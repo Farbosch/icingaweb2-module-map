@@ -32,7 +32,7 @@ class IndexController extends CompatController
             }
         }
 
-        $parameterDefaults = array(
+        $parameterDefaults = [
             "default_zoom" => "4",
             "default_long" => '13.377485',
             "default_lat" => '52.515855',
@@ -44,7 +44,7 @@ class IndexController extends CompatController
             "popup_mouseover" => 0,
             "tile_url" => "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             "opencage_apikey" => "",
-        );
+        ];
 
         /*
          * 1. url

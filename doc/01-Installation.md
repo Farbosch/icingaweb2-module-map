@@ -9,33 +9,15 @@ Requirements
 
 The Icinga Web 2 `monitoring` module needs to be configured and enabled.
 
-Installation from .tar.gz
--------------------------
-
-Download the latest version and extract it to a folder named `map`
-in one of your Icinga Web 2 module path directories.
-
-You might want to use a script as follows for this task:
-```sh
-ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
-REPO_URL="https://github.com/nbuchwitz/icingaweb2-module-map"
-TARGET_DIR="${ICINGAWEB_MODULEPATH}/map"
-MODULE_VERSION="1.1.0"
-URL="${REPO_URL}/archive/v${MODULE_VERSION}.tar.gz"
-install -d -m 0755 "${TARGET_DIR}"
-wget -q -O - "$URL" | tar xfz - -C "${TARGET_DIR}" --strip-components 1
-```
-
 Installation from GIT repository
 --------------------------------
 
-Another convenient method is the installation directly from our GIT repository.
 Just clone the repository to one of your Icinga Web 2 module path directories.
 It will be immediately ready for use:
 
 ```sh
 ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
-REPO_URL="https://github.com/nbuchwitz/icingaweb2-module-map"
+REPO_URL="https://github.com/Farbosch/icingaweb2-module-map"
 TARGET_DIR="${ICINGAWEB_MODULEPATH}/map"
 git clone "${REPO_URL}" "${TARGET_DIR}"
 ```
