@@ -242,7 +242,6 @@ class SearchController extends MapController
         $results["ocg"] = $this->opencageSearch($query);
         if (!$lite) {
             $results["hosts"] = $this->hostSearch($query);
-            $results["services"] = $this->serviceSearch($query);
         }
 
         header('Content-Type: application/javascript; charset=utf-8');

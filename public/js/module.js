@@ -283,7 +283,7 @@
             function removeOldMarkers(id, data) {
                 // remove old markers
                 $.each(cache[id].hostMarkers, function (identifier, d) {
-                    if ((data['hosts'] && !data['hosts'][identifier]) && (data['services'] && !data['services'][identifier])) {
+                    if (data['hosts'] && !data['hosts'][identifier]) {
                         cache[id].markers.removeLayer(d);
                         delete cache[id].hostMarkers[identifier];
                     }
@@ -328,66 +328,8 @@
                             states.push((data['host_state'] == 1 ? 2 : data['host_state']))
                         }
 
-                        let table = '<table class="icinga-module module-monitoring">';
-                        if (isUsingIcingadb) {
-                            //TODO add icingadb design
-                            table = '<table class="icinga-module module-icingadb">';
-                        }
-
-                        services = '<div class="map-popup-services">';
-                        services += '<h1><span class="icon-services"></span> Services</h1>';
-                        services += '<div class="scroll-view">';
-                        services += table;
-                        services += '<tbody>';
-
-                        $.each(data['services'], function (service_display_name, service) {
-                            states.push(service['service_state']);
-
-                            service_handled = "";
-                            if ((data['host_state'] == 1 && data['host_acknowledged']) || (service['service_acknowledged'] == 1 || service['service_in_downtime'] == 1)) {
-                                service_handled = " handled";
-                            }
-
-                            let ServiceStateClass = " state-" + service_status[service['service_state']][1].toLowerCase();
-                            let ServiceLink = '/monitoring/service/show?host=' + data['host_name'] + '&service=' + service['service_name'];
-                            let tdClasses = "state-col" + ServiceStateClass + service_handled;
-                            let statelabel = '<div class="state-label">' + service_status[service['service_state']][0] + '</div>';
-                            if (isUsingIcingadb) {
-                                ServiceLink = '/icingadb/service?host.name=' + data['host_name'] + '&name=' + service['service_name'];
-                                tdClasses = "state-ball center" + ServiceStateClass + " ball-size-l" + service_handled;
-                                statelabel = "";
-                                if (service_handled) {
-                                    statelabel = '<i class="icon fa fa-check"></i>';
-                                }
-                            }
-                            services += '<tr>';
-
-                            services += '<td class="' + tdClasses + '">';
-                            services += statelabel;
-                            services += '</td>';
-
-                            services += '<td>';
-                            services += '<div class="state-header">';
-                            services += '<a data-hostname="' + data['host_name'] + '" data-base-target="_next" href="'
-                                + icinga.config.baseUrl
-                                + ServiceLink
-                                + '">';
-                            services += service_display_name;
-                            services += '</a>';
-                            services += '</div>';
-                            services += '</td>';
-
-                            services += '</tr>';
-
-                            if (type === 'services') {
-                                display_name = service_display_name + " (" + display_name + ")";
-                            }
-                        });
-
-                        services += '</tbody>';
-                        services += '</table>';
-                        services += '</div>';
-                        services += '</div>';
+                        // Service map popup rendering removed.
+                        services = "";
 
                         worstState = getWorstState(states);
 

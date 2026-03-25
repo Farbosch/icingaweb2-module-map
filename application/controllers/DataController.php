@@ -82,13 +82,7 @@ class DataController extends MapController
                 }
             }
 
-            if (in_array($objectType, ['all', 'service'])) {
-                if ($this->isUsingIcingadb) {
-                   $this->addIcingadbServicesToPoints();
-                } else {
-                    $this->addServicesToPoints();
-                }
-            }
+            // Service points fetching removed.
         } catch (\Exception $e) {
             $this->points['message'] = $e->getMessage();
             $this->points['trace'] = $e->getTraceAsString();
@@ -119,26 +113,7 @@ class DataController extends MapController
         $this->applyRestriction('monitoring/filter/objects', $hostQuery);
         $this->filterQuery($hostQuery);
 
-        // get service data
-        $serviceQuery = $this->backend
-            ->select()
-            ->from('servicestatus', [
-                'host_name',
-                'service_display_name',
-                'service_name' => 'service',
-                'service_acknowledged',
-                'service_state' => 'service_' . $this->stateColumn,
-                'service_last_state_change' => 'service_' . $this->stateChangeColumn,
-                'service_in_downtime'
-            ])
-            ->applyFilter(Filter::fromQueryString('_host_geolocation >'));
-
-        if ($this->onlyProblems) {
-            $serviceQuery->applyFilter(Filter::where('service_problem', 1));
-        }
-
-        $this->applyRestriction('monitoring/filter/objects', $serviceQuery);
-        $this->filterQuery($serviceQuery);
+        // Service query removed.
 
         if ($hostQuery->count() > 0) {
             foreach ($hostQuery as $row) {
@@ -157,24 +132,12 @@ class DataController extends MapController
             }
         }
 
-        // add services to host
-        if ($serviceQuery->count() > 0) {
-            foreach ($serviceQuery as $row) {
-                $hostname = $row->host_name;
+        // Service association removed.
 
-                $service = (array)$row;
-                unset($service['host_name']);
-
-                if (isset($this->points['hosts'][$hostname])) {
-                    $this->points['hosts'][$hostname]['services'][$service['service_display_name']] = $service;
-                }
-            }
-        }
-
-        // remove hosts without problems and services
+        // remove hosts without problems
         if ($this->onlyProblems) {
             foreach ($this->points['hosts'] as $name => $host) {
-                if (empty($host['services']) && $host['host_problem'] != '1') {
+                if ($host['host_problem'] != '1') {
                     unset($this->points['hosts'][$name]);
                 }
             }
@@ -256,16 +219,7 @@ class DataController extends MapController
                 'state.is_acknowledged',
                 'state.in_downtime',
                 'state.is_problem',
-                'service.id',
-                'service.name',
-                'service.display_name',
-                'service.state.is_acknowledged',
-                'service.state.hard_state',
-                'service.state.soft_state',
-                'service.state.last_state_change',
-                'service.state.is_acknowledged',
-                'service.state.in_downtime',
-                'service.state.is_problem',
+
             ])
             ->filter(IplFilter::like('host.vars.geolocation', '*'))
             ->setResultSetClass(VolatileStateResults::class);
@@ -303,16 +257,13 @@ class DataController extends MapController
                 $this->points['hosts'][$row->name] = $host;
             }
 
-            if ($row->service->id !== null) {
-                $service = $this->populateObjectColumnsToArray($row->service);
-                $this->points['hosts'][$hostname]['services'][$row->service->display_name] = $service;
-            }
+            // Service association removed.
         }
 
-        // remove hosts without problems and services
+        // remove hosts without problems
         if ($this->onlyProblems) {
             foreach ($this->points['hosts'] as $name => $host) {
-                if (empty($host['services']) && $host['host_problem'] !== 1) {
+                if ($host['host_problem'] !== 1) {
                     unset($this->points['hosts'][$name]);
                 }
             }
