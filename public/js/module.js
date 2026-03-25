@@ -404,7 +404,6 @@
                 });
 
                 cache[id].markers.refreshClusters();
-                cache[id].map.spin(false);
 
                 // TODO: Should be updated instant and not only on data refresh
                 cache[id].map.invalidateSize();
@@ -416,10 +415,35 @@
             }
 
             let url = icinga.config.baseUrl + '/map/data/points?' + filterParams(id, cache[id].parameters);
-            $.getJSON(url, processData)
-                .fail(function (jqxhr, textStatus, error) {
+            let limit = 250;
+            let offset = 0;
+
+            function fetchChunk() {
+                let chunk_url = url + '&limit=' + limit + '&offset=' + offset;
+                $.getJSON(chunk_url, function(json) {
+                    if (json['message']) {
+                        errorMessage(json['message']);
+                        return;
+                    }
+
+                    let hostsCount = json['hosts'] ? Object.keys(json['hosts']).length : 0;
+
+                    if (hostsCount > 0) {
+                        processData(json);
+                        offset += limit;
+                        
+                        // Yield to browser for progressive rendering
+                        setTimeout(fetchChunk, 50);
+                    } else {
+                        // Finished loading chunk pages
+                        cache[id].map.spin(false);
+                    }
+                }).fail(function (jqxhr, textStatus, error) {
                     errorMessage(error);
                 });
+            }
+
+            fetchChunk();
         },
 
         onRenderedContainer: function (event) {

@@ -33,6 +33,8 @@ class DataController extends MapController
 
     /** @var bool Whether to show ony problem services */
     private $onlyProblems;
+    private $limit = 0;
+    private $offset = 0;
     private $points = [];
 
     /**
@@ -55,6 +57,8 @@ class DataController extends MapController
             $objectType = strtolower($this->params->shift('objectType', 'all'));
 
             $this->onlyProblems = (bool)$this->params->shift('problems', false);
+            $this->limit = (int)$this->params->shift('limit', 0);
+            $this->offset = (int)$this->params->shift('offset', 0);
 
             if ($this->isUsingIcingadb) {
                 $this->filter = QueryString::parse((string) $this->params);
@@ -112,6 +116,10 @@ class DataController extends MapController
 
         $this->applyRestriction('monitoring/filter/objects', $hostQuery);
         $this->filterQuery($hostQuery);
+
+        if ($this->limit > 0) {
+            $hostQuery->limit($this->limit, $this->offset);
+        }
 
         // Service query removed.
 
@@ -233,6 +241,11 @@ class DataController extends MapController
         }
 
         $this->icingadbUtils->applyRestrictions($hostQuery);
+
+        if ($this->limit > 0) {
+            $hostQuery->limit($this->limit);
+            $hostQuery->offset($this->offset);
+        }
 
         $hostQuery = $hostQuery->execute();
         if (! $hostQuery->hasResult()) {
