@@ -280,15 +280,8 @@
             let show_host = parameters.show_host;
             let $that = this;
 
-            function removeOldMarkers(id, data) {
-                // remove old markers
-                $.each(cache[id].hostMarkers, function (identifier, d) {
-                    if (data['hosts'] && !data['hosts'][identifier]) {
-                        cache[id].markers.removeLayer(d);
-                        delete cache[id].hostMarkers[identifier];
-                    }
-                });
-            }
+
+
 
             function errorMessage(msg) {
                 cache[id].map.spin(false);
@@ -309,7 +302,6 @@
                     errorMessage(json['message']);
                     return;
                 }
-                removeOldMarkers(id, json);
 
                 $.each(json, function (type, element) {
                     $.each(element, function (identifier, data) {
@@ -418,6 +410,9 @@
             let limit = 250;
             let offset = 0;
 
+            // Track all host identifiers seen across chunks for cleanup
+            let allReceivedHosts = {};
+
             function fetchChunk() {
                 let chunk_url = url + '&limit=' + limit + '&offset=' + offset;
                 $.getJSON(chunk_url, function(json) {
@@ -429,13 +424,27 @@
                     let hostsCount = json['hosts'] ? Object.keys(json['hosts']).length : 0;
 
                     if (hostsCount > 0) {
+                        // Accumulate all host identifiers from this chunk
+                        $.each(json['hosts'], function (identifier) {
+                            allReceivedHosts[identifier] = true;
+                        });
+
                         processData(json);
                         offset += limit;
                         
                         // Yield to browser for progressive rendering
                         setTimeout(fetchChunk, 50);
                     } else {
-                        // Finished loading chunk pages
+                        // All chunks loaded — now remove stale markers not in any chunk
+                        $.each(cache[id].hostMarkers, function (identifier, d) {
+                            if (!allReceivedHosts[identifier]) {
+                                cache[id].markers.removeLayer(d);
+                                delete cache[id].hostMarkers[identifier];
+                            }
+                        });
+                        cache[id].markers.refreshClusters();
+
+                        // Finished loading all chunks
                         cache[id].map.spin(false);
                     }
                 }).fail(function (jqxhr, textStatus, error) {
