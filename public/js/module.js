@@ -415,6 +415,7 @@
 
             function fetchChunk() {
                 let chunk_url = url + '&limit=' + limit + '&offset=' + offset;
+                console.log('[map] fetchChunk offset=' + offset + ' limit=' + limit);
                 $.getJSON(chunk_url, function(json) {
                     if (json['message']) {
                         errorMessage(json['message']);
@@ -422,6 +423,7 @@
                     }
 
                     let hostsCount = json['hosts'] ? Object.keys(json['hosts']).length : 0;
+                    console.log('[map] chunk offset=' + offset + ' returned ' + hostsCount + ' hosts');
 
                     if (hostsCount > 0) {
                         // Accumulate all host identifiers from this chunk
@@ -431,19 +433,27 @@
 
                         processData(json);
                         offset += limit;
+
+                        console.log('[map] total accumulated hosts: ' + Object.keys(allReceivedHosts).length + ', markers on map: ' + Object.keys(cache[id].hostMarkers).length);
                         
                         // Yield to browser for progressive rendering
                         setTimeout(fetchChunk, 50);
                     } else {
                         // All chunks loaded — now remove stale markers not in any chunk
+                        let removedCount = 0;
                         $.each(cache[id].hostMarkers, function (identifier, d) {
                             if (!allReceivedHosts[identifier]) {
                                 cache[id].markers.removeLayer(d);
                                 delete cache[id].hostMarkers[identifier];
+                                removedCount++;
                             }
                         });
+                        if (removedCount > 0) {
+                            console.log('[map] removed ' + removedCount + ' stale markers');
+                        }
                         cache[id].markers.refreshClusters();
 
+                        console.log('[map] all chunks loaded. Total markers: ' + Object.keys(cache[id].hostMarkers).length);
                         // Finished loading all chunks
                         cache[id].map.spin(false);
                     }
